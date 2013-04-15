@@ -1,0 +1,216 @@
+'-1609262581':
+  :title: ForeignExchange:NDF
+  :pub_date: 2013-04-12 00:59:43.000000000 +01:00
+  :id: '2089996'
+  :asset: FX
+  :taxonomy: ForeignExchange:NDF
+  :time_stamp: '2013-04-10T14:21:58'
+  :status: Trade
+  :und: USD
+  :acc: KRW
+  :und_not: '19,000'
+  :acc_not: '21,536,499'
+'1679693173':
+  :title: ForeignExchange:NDF
+  :pub_date: 2013-04-12 00:59:43.000000000 +01:00
+  :id: '2089997'
+  :asset: FX
+  :taxonomy: ForeignExchange:NDF
+  :time_stamp: '2013-04-10T14:21:33'
+  :status: Trade
+  :und: USD
+  :acc: KRW
+  :und_not: '54,000'
+  :acc_not: '61,219,427'
+'1927173464':
+  :title: ForeignExchange:NDF
+  :pub_date: 2013-04-12 00:59:43.000000000 +01:00
+  :id: '2089998'
+  :asset: FX
+  :taxonomy: ForeignExchange:NDF
+  :time_stamp: '2013-04-10T14:21:52'
+  :status: Trade
+  :und: USD
+  :acc: KRW
+  :und_not: '81,000'
+  :acc_not: '91,813,503'
+'1498916996':
+  :title: ForeignExchange:NDF
+  :pub_date: 2013-04-12 00:59:43.000000000 +01:00
+  :id: '2089999'
+  :asset: FX
+  :taxonomy: ForeignExchange:NDF
+  :time_stamp: '2013-04-10T14:21:45'
+  :status: Trade
+  :und: USD
+  :acc: KRW
+  :und_not: '54,000'
+  :acc_not: '61,219,427'
+'977195907':
+  :title: ForeignExchange:NDF
+  :pub_date: 2013-04-12 00:59:43.000000000 +01:00
+  :id: '2090000'
+  :asset: FX
+  :taxonomy: ForeignExchange:NDF
+  :time_stamp: '2013-04-10T14:22:02'
+  :status: Trade
+  :und: USD
+  :acc: RUB
+  :und_not: '45,000'
+  :acc_not: '1,406,970'
+'1449257887':
+  :title: ForeignExchange:NDF
+  :pub_date: 2013-04-12 00:59:43.000000000 +01:00
+  :id: '2090001'
+  :asset: FX
+  :taxonomy: ForeignExchange:NDF
+  :time_stamp: '2013-04-10T14:21:39'
+  :status: Trade
+  :und: USD
+  :acc: KRW
+  :und_not: '27,000'
+  :acc_not: '30,609,714'
+'1495193229':
+  :title: ForeignExchange:ComplexExotic
+  :pub_date: 2013-04-12 00:59:43.000000000 +01:00
+  :id: '2090002'
+  :asset: FX
+  :taxonomy: ForeignExchange:ComplexExotic
+  :time_stamp: '2013-04-11T19:27:06'
+  :status: Trade
+  :und: TRY
+  :acc: ''
+  :settle: ''
+  :und_not: '200,000'
+  :acc_not: ''
+  :expiry: 2013-12-18
+  :strike: ''
+  :type: ''
+  :prem_ccy: TRY
+  :prem: '169,000'
+'-855195074':
+  :title: ForeignExchange:NDF
+  :pub_date: 2013-04-12 00:59:43.000000000 +01:00
+  :id: '2090003'
+  :asset: FX
+  :taxonomy: ForeignExchange:NDF
+  :time_stamp: '2013-04-11T19:28:40'
+  :status: Trade
+  :und: USD
+  :acc: ARS
+  :und_not: '380,000'
+  :acc_not: '1,995,000'
+'247687222':
+  :title: ForeignExchange:NDF
+  :pub_date: 2013-04-12 00:59:43.000000000 +01:00
+  :id: '2090004'
+  :asset: FX
+  :taxonomy: ForeignExchange:NDF
+  :time_stamp: '2013-04-11T19:28:39'
+  :status: Trade
+  :und: USD
+  :acc: ARS
+  :und_not: '560,000'
+  :acc_not: '2,940,000'
+'-820646582':
+  :title: ForeignExchange:VanillaOption
+  :pub_date: 2013-04-12 01:00:14.000000000 +01:00
+  :id: '2090006'
+  :asset: FX
+  :taxonomy: ForeignExchange:VanillaOption
+  :time_stamp: '2013-04-11T19:34:51'
+  :status: Trade
+  :und: EUR
+  :acc: GBP
+  :settle: ''
+  :und_not: '20,000,000'
+  :acc_not: '16,600,000'
+  :expiry: 2013-06-13
+  :strike: '0.83'
+  :type: P
+  :prem_ccy: EUR
+  :prem: '54,500'
+'1589595705':
+  :title: ForeignExchange:NDF
+  :pub_date: 2013-04-12 01:01:26.000000000 +01:00
+  :id: '2090008'
+  :asset: FX
+  :taxonomy: ForeignExchange:NDF
+  :time_stamp: '2013-04-10T14:22:05'
+  :status: Trade
+  :und: USD
+  :acc: RUB
+  :und_not: '81,000'
+  :acc_not: '2,532,546'
+'-274897873':
+  :title: ForeignExchange:NDF
+  :pub_date: 2013-04-12 01:01:26.000000000 +01:00
+  :id: '2090009'
+  :asset: FX
+  :taxonomy: ForeignExchange:NDF
+  :time_stamp: '2013-04-10T14:22:10'
+  :status: Trade
+  :und: USD
+  :acc: RUB
+  :und_not: '67,000'
+  :acc_not: '2,094,822'
+'1073931505':
+  :title: ForeignExchange:NDF
+  :pub_date: 2013-04-12 01:01:26.000000000 +01:00
+  :id: '2090010'
+  :asset: FX
+  :taxonomy: ForeignExchange:NDF
+  :time_stamp: '2013-04-10T14:22:06'
+  :status: Trade
+  :und: USD
+  :acc: RUB
+  :und_not: '38,000'
+  :acc_not: '1,188,108'
+'-1824129934':
+  :title: ForeignExchange:NDF
+  :pub_date: 2013-04-12 01:01:26.000000000 +01:00
+  :id: '2090011'
+  :asset: FX
+  :taxonomy: ForeignExchange:NDF
+  :time_stamp: '2013-04-11T19:36:52'
+  :status: Trade
+  :und: USD
+  :acc: INR
+  :und_not: '1,000,000'
+  :acc_not: '54,630,000'
+'-940837448':
+  :title: ForeignExchange:VanillaOption
+  :pub_date: 2013-04-12 01:01:26.000000000 +01:00
+  :id: '2090013'
+  :asset: FX
+  :taxonomy: ForeignExchange:VanillaOption
+  :time_stamp: '2013-04-11T19:39:49'
+  :status: Trade
+  :und: SEK
+  :acc: EUR
+  :settle: ''
+  :und_not: '16,643,000'
+  :acc_not: '2,000,000'
+  :expiry: 2013-04-18
+  :strike: '8.3215'
+  :type: C
+  :prem_ccy: USD
+  :prem: '10,580.76042'
+'1298560669':
+  :title: ForeignExchange:VanillaOption
+  :pub_date: 2013-04-12 01:01:52.000000000 +01:00
+  :id: '2090014'
+  :asset: FX
+  :taxonomy: ForeignExchange:VanillaOption
+  :time_stamp: '2013-04-11T19:40:50'
+  :status: Trade
+  :und: EUR
+  :acc: SEK
+  :settle: ''
+  :und_not: '2,000,000'
+  :acc_not: '16,643,000'
+  :expiry: 2013-04-18
+  :strike: '8.3215'
+  :type: P
+  :prem_ccy: USD
+  :prem: '10,580.76042'
