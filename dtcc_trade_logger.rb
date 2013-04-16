@@ -2,7 +2,6 @@
 #  Parse the trade events and extract useful information and saves it to a file in YAML format
 require "mongo"
 require "logger"
-require './trade'  
 require './dtcc_rss_client'
 require './fx_feeds'
 
@@ -55,51 +54,13 @@ class DTCC_logger
 
         new_trades.each do |trade|
 
-          if @trades.find( :dtcc_id => trade.data[:dtcc_id] ).to_a.size != 0
+          if @trades.find( :dtcc_id => trade[:dtcc_id] ).to_a.size != 0
+            $LOG.info "#{trade[:dtcc_id]} : Ignoring trade : already in db"
+
             # handle case where we already have the id
           else
 
-            # Enhance trade with meta_data 
-            # 1- add a spot ref
-            begin
-              pair = "#{trade.data[:und]}#{trade.data[:acc]}"
-              spot_ref = @fx_cache.spot(pair)
-              trade.data[:m_spot_ref] = spot_ref  if spot_ref
-              $LOG.debug "Added spot ref #{pair}: #{spot_ref}"
-
-            rescue
-              $LOG.warn "Error adding spot_ref using FX service for pair #{pair}: ERROR : #{$!}"
-            end
-
-            # 2- add a usd equiv notional
-            begin
-              usd_equiv_not = -1
-
-              if trade.data[:und].upcase == "USD"
-                usd_equiv_not = trade.data[:und_not]
-                trade.data[:m_usd_equiv_not] = usd_equiv_not
-                $LOG.debug "Added USD Equiv Notional of #{usd_equiv_not}"
-                
-              elsif trade.data[:acc].upcase == "USD"
-                usd_equiv_not = trade.data[:acc_not]
-                trade.data[:m_usd_equiv_not] = usd_equiv_not
-                $LOG.debug "Added USD Equiv Notional of #{usd_equiv_not}"
-                
-              else
-                pair = "USD#{trade.data[:und]}"
-                usdccy = @fx_cache.spot(pair)
-                $LOG.debug "#{pair} spot ref : #{usdccy}"
-
-                if usdccy && usdccy != 0
-                  usd_equiv_not = trade.data[:und_not] / usdccy
-                  trade.data[:m_usd_equiv_not] = usd_equiv_not
-                  $LOG.debug "Added USD Equiv Notional of #{usd_equiv_not}"
-                end
-              end
-            rescue
-              $LOG.warn "Error adding USD equiv Not for pair #{pair}: ERROR : #{$!}"
-            end
-
+            add_meta_data (trade )
             handle_new_trade( trade )
             i += 1
           end
@@ -113,28 +74,68 @@ class DTCC_logger
 
 
   def stop
-    $LOG.info "Closing connection to #{HOST}"
+    puts "Closing connection to #{HOST}:#{DB}"
+    $LOG.info "Closing connection to #{HOST}:#{DB}"
     @mgo_client.close
   end
+
+  # Add addition data to the trdae record
+  def add_meta_data(trade)
+    # Enhance trade with meta_data 
+    # 1- add a spot ref
+    begin
+      pair = "#{trade[:und]}#{trade[:acc]}"
+      spot_ref = @fx_cache.spot(pair)
+      trade[:m_spot_ref] = spot_ref  if spot_ref
+      $LOG.debug "#{trade[:dtcc_id]} : Added spot ref #{pair}: #{spot_ref}"
+
+    rescue
+      $LOG.warn "#{trade[:dtcc_id]} : Error adding spot_ref using FX service for pair #{pair}: ERROR : #{$!}"
+    end
+
+    # 2- add a usd equiv notional
+    begin
+      usd_equiv_not = -1
+
+      if trade[:und].upcase == "USD"
+        usd_equiv_not = trade[:und_not]
+        trade[:m_usd_equiv_not] = usd_equiv_not
+        $LOG.debug "#{trade[:dtcc_id]} : Added USD Equiv Notional of #{usd_equiv_not}"
+
+      elsif trade[:acc].upcase == "USD"
+        usd_equiv_not = trade[:acc_not]
+        trade[:m_usd_equiv_not] = usd_equiv_not
+        $LOG.debug "#{trade[:dtcc_id]} : Added USD Equiv Notional of #{usd_equiv_not}"
+
+      else
+        pair = "USD#{trade[:und]}"
+        usdccy = @fx_cache.spot(pair)
+        $LOG.debug "#{trade[:dtcc_id]} : #{pair} spot ref : #{usdccy}"
+
+        if usdccy && usdccy != 0
+          usd_equiv_not = trade[:und_not] / usdccy
+          trade[:m_usd_equiv_not] = usd_equiv_not
+          $LOG.debug "#{trade[:dtcc_id]} : Added USD Equiv Notional of #{usd_equiv_not}"
+        end
+      end
+    rescue
+      $LOG.warn "#{trade[:dtcc_id]} : Error adding USD equiv Not for pair #{pair}: ERROR : #{$!}"
+    end
+  end
+
 
 
   # Add to mongo database in collection trade_list in db dtcc_trades
   def handle_new_trade( trade )
 
     begin
-      id = @trades.insert( trade.data )
+      id = @trades.insert( trade )
     rescue Mongo::OperationFailure => e
-      $LOG.error "Attempting to insert #{trade_data.inspect} into #{HOST}:#{DB}:#{COLLECTION}: #{e}"  
+      $LOG.error "#{trade[:dtcc_id]} : Failed to insert #{trade_data.inspect} into #{HOST}:#{DB}:#{COLLECTION} : Error #{e}"  
     else
-      $LOG.info "Added new trade: #{ @trades.find('_id' => id).to_a }"
+      $LOG.info "#{trade[:dtcc_id]} : Added new trade into #{HOST}:#{DB}:#{COLLECTION} #{ @trades.find('_id' => id).to_a }"
     end
-
-    #  Add to yaml log file
-    # trade.append("logs/trade_log.yaml", :yaml)
-    # 
-    #  Add to json log file
-    # trade.append("logs/trade_log.json", :json)            
-
+  
   end
 
   def exception_message(e)

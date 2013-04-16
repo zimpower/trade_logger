@@ -1,58 +1,29 @@
-#
-#  Representation of a trade and a couple of helper functions
-require 'yaml'   
-require 'json'
-
-# Helper function for writing yaml and json - extending the Hash class
-# open the Hash class and add the deep_stringify_keys
-class Hash
-  def deep_stringify_keys
-    new_hash = {}
-    self.each do |key, value|
-      new_hash.merge!(key.to_s => (value.is_a?(Hash) ? value.deep_stringify_keys : value))
-    end
-  end
-end
-
-
-
 class Trade
-  attr_accessor :data
-
-  def initialize(trade = {})
-    @data = trade
-  end
-
-  def id
-    return @data[:id]
-  end
-
-  # Pretty Yaml file writing
-  def append(filename, type = :yaml)
-    if @data 
-      File.open(filename, "a") do |f|
-        if type == :yaml 
-          f.write(Trade::yaml(@data)) 
-        elsif type == :json
-          f.write(Trade::json(@data)) 
-        else
-          # unknown file-type
-        end
-      end
-    end
-  end
-
-  # Helper Class function to create pretty yaml
-  def self.yaml(hash)
-    string = hash.deep_stringify_keys.to_yaml
-    #  string.gsub("!ruby/symbol ", ":").sub("---","").split("\n").map(&:rstrip).join("\n").strip
-  end
-
-  # Helper Class function to create pretty json
-  def self.json(hash)
-    string = hash.deep_stringify_keys.to_json
-    #  string.gsub("!ruby/symbol ", ":").sub("---","").split("\n").map(&:rstrip).join("\n").strip
-  end
+  include Mongoid::Document
+  field :rss_guid, type: String
+  field :dtcc_id, type: String
+  field :orig_dtcc_id, type: String
+  field :title, type: String
+  field :pub_date, type: Hash
+  field :asset, type: String
+  field :taxonomy, type: String
+  field :time_stamp, type: Hash
+  field :status, type: Trade
+  field :und, type: String
+  field :acc, type: String
+  field :und_not, type: Numeric 
+  field :acc_not, type: Numeric 
+  field :expiry, type: Hash 
+  field :strike, type: Numeric
+  field :type, type: String
+  field :prem_ccy, type: String
+  field :prem, type: Numeric
+  field :m_spot_ref, type: Numeric
+  field :m_usd_equiv_not, type: Numeric
   
-  
+  index( { dtcc_id: 1 } , { unique: true } )
+  index( { taxonomy: 1} )
+  index( { m_usd_equiv_not: 1} )
+  index( { "expiry.d" => -1 } )
+  index( { "time_stamp.d" =>  -1 } )
 end
