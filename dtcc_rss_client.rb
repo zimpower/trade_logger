@@ -109,13 +109,9 @@ class DTCC_listener
       trade[:rss_guid] = item[:guid]
 
       begin
-        item[:pub_date] && trade[:pub_date] = item[:pub_date].utc
-
-        th = Time_hash.new(item[:pub_date]).to_hash
-
-        $LOG.info ":pub_date: #{item[:pub_date]} Time Hash: #{th}"
+        item[:pub_date] && trade[:pub_date] = Time_hash.new(item[:pub_date]).to_hash
       rescue 
-        $LOG.error "Error parsing RSS feed 'pub_date'"
+        $LOG.warning "Error parsing RSS feed 'pub_date' field"
       end
 
       # item.description contains a CSV row with all the trade data
@@ -136,8 +132,15 @@ class DTCC_listener
       begin
         csv['ROUNDED_NOTIONAL_AMOUNT_1'][1] && trade[:und_not] = csv['ROUNDED_NOTIONAL_AMOUNT_1'][1].delete(',').to_f
         csv['ROUNDED_NOTIONAL_AMOUNT_2'][1] && trade[:acc_not] = csv['ROUNDED_NOTIONAL_AMOUNT_2'][1].delete(',').to_f
-        csv['EXECUTION_TIMESTAMP'][1] && trade[:time_stamp] = Time.parse(csv['EXECUTION_TIMESTAMP'][1]).utc
       rescue
+        $LOG.warning "Error parsing RSS feed 'notional' fields"
+      end
+
+      begin
+        csv['EXECUTION_TIMESTAMP'][1] && trade[:time_stamp] = Time_hash.new(csv['EXECUTION_TIMESTAMP'][1]).to_hash
+        # csv['EXECUTION_TIMESTAMP'][1] && trade[:time_stamp] = Time.parse(csv['EXECUTION_TIMESTAMP'][1]).utc
+      rescue
+        $LOG.warning "Error parsing RSS feed 'EXECUTION_TIMESTAMP' CSV field"
       end
 
       if trade[:taxonomy] == "ForeignExchange:NDF"
@@ -150,14 +153,21 @@ class DTCC_listener
         # do something with vanilla options, NDOs 
 
         trade[:prem_ccy]  = csv['OPTION_CURRENCY'][1]
+        
         begin
-          csv['OPTION_PREMIUM'][1] && trade[:prem] = csv['OPTION_PREMIUM'][1].delete(',').to_f
-          csv['OPTION_STRIKE_PRICE'][1] && trade[:strike] = csv['OPTION_STRIKE_PRICE'][1].delete(',').to_f
-          csv['OPTION_TYPE'][1] && trade[:type]  =  csv['OPTION_TYPE'][1].delete('-')
-          csv['OPTION_EXPIRATION_DATE'][1] && trade[:expiry]  = Time.parse(csv['OPTION_EXPIRATION_DATE'][1]).utc
-        rescue
-        end
-
+           csv['OPTION_PREMIUM'][1] && trade[:prem] = csv['OPTION_PREMIUM'][1].delete(',').to_f
+           csv['OPTION_STRIKE_PRICE'][1] && trade[:strike] = csv['OPTION_STRIKE_PRICE'][1].delete(',').to_f
+           csv['OPTION_TYPE'][1] && trade[:type]  =  csv['OPTION_TYPE'][1].delete('-')
+         rescue
+           $LOG.warning "Error parsing RSS feed 'OPTION_PREMIUM', 'OPTION_STRIKE_PRICE', 'OPTION_TYPE' fields"
+         end
+         
+         begin
+           csv['OPTION_EXPIRATION_DATE'][1] && trade[:expiry] = Time_hash.new(csv['OPTION_EXPIRATION_DATE'][1]).to_hash
+           # csv['OPTION_EXPIRATION_DATE'][1] && trade[:expiry]  = Time.parse(csv['OPTION_EXPIRATION_DATE'][1]).utc
+         rescue
+           $LOG.warning "Error parsing RSS feed 'EXECUTION_TIMESTAMP' CSV field"
+         end
       end
 
       # add a new trade to the new_trades array[]

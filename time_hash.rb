@@ -15,6 +15,15 @@ class Time_hash
     elsif new_time.is_a?(Date)
       @utctime = new_time.to_time.utc
       sync
+    elsif new_time.is_a?(Hash)
+      begin
+        str = "#{new_time['d']} #{new_time['t']}"
+        @utctime = Time.parse(str).utc
+        sync
+      rescue
+        make_invalid
+        raise ArgumentError.new('Unable to parse hash value: expect {"d" => "2001-12-29","t" => "15:30:12"} ')
+      end
     elsif new_time.is_a?(String)
       begin
         @utctime = Time.parse(new_time).utc

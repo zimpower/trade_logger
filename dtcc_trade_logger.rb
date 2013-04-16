@@ -58,6 +58,9 @@ class DTCC_logger
           if @trades.find( :dtcc_id => trade_data[:dtcc_id] ).to_a.size != 0
             # handle case where we already have the id
           else
+            # Enhance trade with meta_data
+            trade.data['m_pair']
+            
             handle_new_trade( trade )
             i += 1
           end
