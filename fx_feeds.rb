@@ -43,7 +43,7 @@ FX_FEED_BASE = 'http://download.finance.yahoo.com/d/quotes.csv?'
 FX_FEED_OPTS = 'f=sl1d1t1'
 FX_FEED_EXT = 'e=.csv'
 
-class Fx_rates
+class FX
   attr_accessor :timeout
 
   def initialize
