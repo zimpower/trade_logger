@@ -1,10 +1,10 @@
 #
 #  Parse the trade events and extract useful information and saves it to a file in YAML format
-
-require './trade'  
-require './dtcc_rss_client'
 require "mongo"
 require "logger"
+require './trade'  
+require './dtcc_rss_client'
+require './fx_feeds'
 
 HOST = "centenary.local"
 DB = "dtcc_trades"
@@ -19,6 +19,7 @@ class DTCC_logger
     @mgo_cleint= nil
     @trades = nil
     @rss_client = nil
+    @fx_cache = FX.new
 
     init_db()
     init_rss()
@@ -49,23 +50,61 @@ class DTCC_logger
 
       if (new_trades!= nil)
         i = 0
-        
-        $LOG.info "Received #{new_trades.count}"   if  i > 0
-        
-        new_trades.each do |trade|
-          trade_data = trade.data
 
-          if @trades.find( :dtcc_id => trade_data[:dtcc_id] ).to_a.size != 0
+        $LOG.info "Received #{new_trades.count}"   if  i > 0
+
+        new_trades.each do |trade|
+
+          if @trades.find( :dtcc_id => trade.data[:dtcc_id] ).to_a.size != 0
             # handle case where we already have the id
           else
-            # Enhance trade with meta_data
-            trade.data['m_pair']
-            
+
+            # Enhance trade with meta_data 
+            # 1- add a spot ref
+            begin
+              pair = "#{trade.data[:und]}#{trade.data[:acc]}"
+              spot_ref = @fx_cache.spot(pair)
+              trade.data[:m_spot_ref] = spot_ref  if spot_ref
+              $LOG.debug "Added spot ref #{pair}: #{spot_ref}"
+
+            rescue
+              $LOG.warn "Error adding spot_ref using FX service for pair #{pair}: ERROR : #{$!}"
+            end
+
+            # 2- add a usd equiv notional
+            begin
+              usd_equiv_not = -1
+
+              if trade.data[:und].upcase == "USD"
+                usd_equiv_not = trade.data[:und_not]
+                trade.data[:m_usd_equiv_not] = usd_equiv_not
+                $LOG.debug "Added USD Equiv Notional of #{usd_equiv_not}"
+                
+              elsif trade.data[:acc].upcase == "USD"
+                usd_equiv_not = trade.data[:acc_not]
+                trade.data[:m_usd_equiv_not] = usd_equiv_not
+                $LOG.debug "Added USD Equiv Notional of #{usd_equiv_not}"
+                
+              else
+                pair = "USD#{trade.data[:und]}"
+                usdccy = @fx_cache.spot(pair)
+                $LOG.debug "#{pair} spot ref : #{usdccy}"
+
+                if usdccy && usdccy != 0
+                  usd_equiv_not = trade.data[:und_not] / usdccy
+                  trade.data[:m_usd_equiv_not] = usd_equiv_not
+                  $LOG.debug "Added USD Equiv Notional of #{usd_equiv_not}"
+                end
+              end
+            rescue
+              $LOG.warn "Error adding USD equiv Not for pair #{pair}: ERROR : #{$!}"
+            end
+
             handle_new_trade( trade )
             i += 1
           end
         end
-        
+
         $LOG.info "Received #{i} new trades #{new_trades.count-i} repeat trades"   if  i > 0
       end
       sleep SLEEP

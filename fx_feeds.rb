@@ -38,7 +38,12 @@ require "csv"
 
 
 HEADERS = %w(TICKER RATE DATE TIME)
-CCYS = %w(USD EUR GBP AUD NZD JPY SEK NOK CHF CAD)
+CCYS = %w(USD EUR GBP AUD NZD JPY SEK NOK CHF CAD
+          SAR KWD AED
+          INR KRW HKD CNY CNH PHP MYR SGD IDR TWD THB
+          CZK PNL HUF RUB RON
+          ZAR
+          BRL MXN CLP ARS COP PEN VEN)
 FX_FEED_BASE = 'http://download.finance.yahoo.com/d/quotes.csv?'
 FX_FEED_OPTS = 'f=sl1d1t1'
 FX_FEED_EXT = 'e=.csv'
