@@ -1,0 +1,12 @@
+development:
+  sessions:
+    default:
+      database: dtcc_trades
+      hosts:
+        - centenary.local:27017
+test:
+  sessions:
+    default:
+      database: dtcc_trades
+      hosts:
+        - centenary.local:27017
