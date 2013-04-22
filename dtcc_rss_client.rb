@@ -5,9 +5,8 @@ require 'rss'  # Provides RSS parsing capabilities
 require 'csv'  # Provide CSV parsing capabilities
 require 'logger'
 require 'time'
-require './time_hash'
-
-$LOG = Logger.new('/usr/local/var/log/dtcc_logger/dtcc_logger.log', 'daily')
+$:.unshift File.dirname(__FILE__)
+require 'time_hash'
 
 # the RSS FEED we are parsingrequire "dtcc_trade_logger"
 
@@ -30,8 +29,11 @@ COLUMNS = %w[DISSEMINATION_ID ORIGINAL_DISSEMINATION_ID ACTION EXECUTION_TIMESTA
 
 
 class DTCC_listener
-  def initialize(feed = RSS_FEED)
-    @feed = feed
+  def initialize(log_file)
+    log_file = "/usr/local/var/log/dtcc_logger/dtcc_logger.log"  unless log_file  
+    $LOG = Logger.new(log_file, 'daily')
+    
+
     @csv_header = COLUMNS.to_csv
   end
 
@@ -110,7 +112,7 @@ class DTCC_listener
       begin
         item[:pub_date] && trade[:pub_date] = Time_hash.new(item[:pub_date]).to_hash
       rescue 
-        $LOG.warning "Error parsing RSS feed 'pub_date' field"
+        $LOG.warn "Error parsing RSS feed 'pub_date' field"
       end
 
       # item.description contains a CSV row with all the trade data
@@ -132,14 +134,14 @@ class DTCC_listener
         csv['ROUNDED_NOTIONAL_AMOUNT_1'][1] && trade[:und_not] = csv['ROUNDED_NOTIONAL_AMOUNT_1'][1].delete(',').to_f
         csv['ROUNDED_NOTIONAL_AMOUNT_2'][1] && trade[:acc_not] = csv['ROUNDED_NOTIONAL_AMOUNT_2'][1].delete(',').to_f
       rescue
-        $LOG.warning "#{trade[:dtcc_id]} : Error parsing RSS feed 'notional' fields"
+        $LOG.warn "#{trade[:dtcc_id]} : Error parsing RSS feed 'notional' fields"
       end
 
       begin
         csv['EXECUTION_TIMESTAMP'][1] && trade[:time_stamp] = Time_hash.new(csv['EXECUTION_TIMESTAMP'][1]).to_hash
         # csv['EXECUTION_TIMESTAMP'][1] && trade[:time_stamp] = Time.parse(csv['EXECUTION_TIMESTAMP'][1]).utc
       rescue
-        $LOG.warning "#{trade[:dtcc_id]} : Error parsing RSS feed 'EXECUTION_TIMESTAMP' CSV field"
+        $LOG.warn "#{trade[:dtcc_id]} : Error parsing RSS feed 'EXECUTION_TIMESTAMP' CSV field"
       end
 
       if trade[:taxonomy] == "ForeignExchange:NDF"
@@ -158,14 +160,14 @@ class DTCC_listener
            csv['OPTION_STRIKE_PRICE'][1] && trade[:strike] = csv['OPTION_STRIKE_PRICE'][1].delete(',').to_f
            csv['OPTION_TYPE'][1] && trade[:type]  =  csv['OPTION_TYPE'][1].delete('-')
          rescue
-           $LOG.warning "#{trade[:dtcc_id]} : Error parsing RSS feed 'OPTION_PREMIUM', 'OPTION_STRIKE_PRICE', 'OPTION_TYPE' fields"
+           $LOG.warn "#{trade[:dtcc_id]} : Error parsing RSS feed 'OPTION_PREMIUM', 'OPTION_STRIKE_PRICE', 'OPTION_TYPE' fields"
          end
          
          begin
            csv['OPTION_EXPIRATION_DATE'][1] && trade[:expiry] = Time_hash.new(csv['OPTION_EXPIRATION_DATE'][1]).to_hash
            # csv['OPTION_EXPIRATION_DATE'][1] && trade[:expiry]  = Time.parse(csv['OPTION_EXPIRATION_DATE'][1]).utc
          rescue
-           $LOG.warning "#{trade[:dtcc_id]} : Error parsing RSS feed 'EXECUTION_TIMESTAMP' CSV field"
+           $LOG.warn "#{trade[:dtcc_id]} : Error parsing RSS feed 'EXECUTION_TIMESTAMP' CSV field"
          end
       end
 

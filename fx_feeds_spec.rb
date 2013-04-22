@@ -1,5 +1,6 @@
 require 'test/unit'
-require './fx_feeds'
+$:.unshift File.dirname(__FILE__)
+require 'fx_feeds'
 
 describe FX, "#spot" do
 

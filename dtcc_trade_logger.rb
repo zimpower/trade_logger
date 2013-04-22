@@ -2,8 +2,9 @@
 #  Parse the trade events and extract useful information and saves it to a file in YAML format
 require "mongo"
 require "logger"
-require './dtcc_rss_client'
-require './fx_feeds'
+$:.unshift File.dirname(__FILE__)
+require 'dtcc_rss_client'
+require 'fx_feeds'
 
 HOST = "centenary.local"
 DB = "dtcc_trades"
@@ -26,16 +27,15 @@ class DTCC_logger
 
   def init_db
     $LOG.info "Attempting connection to #{HOST}..."
-    begin
-      @mgo_client = Mongo::MongoClient.new(HOST) 
-    rescue Mongo::ConnectionFailure => e
-      $LOG.error "Attempting to connect to '#{HOST}' : #{exception_message(e)}"  
-      raise e
-    else
-      $LOG.info "Success : connected to #{HOST}"
-    end
 
+    @mgo_client = Mongo::MongoClient.new(HOST) 
     @trades = @mgo_client.db(DB).collection(COLLECTION)
+  rescue Mongo::ConnectionFailure => e
+    $LOG.error "Attempting to connect to '#{HOST}' : #{exception_message(e)}"  
+    raise e
+  else
+    $LOG.info "Success : connected to #{HOST}"
+
   end
 
   def init_rss
@@ -50,7 +50,7 @@ class DTCC_logger
       if (new_trades!= nil)
         i = 0
 
-        $LOG.info "Received #{new_trades.count}"   if  i > 0
+        $LOG.info "Received #{new_trades.count}"  
 
         new_trades.each do |trade|
 
@@ -66,7 +66,7 @@ class DTCC_logger
           end
         end
 
-        $LOG.info "Received #{i} new trades #{new_trades.count-i} repeat trades"   if  i > 0
+        $LOG.info "Received #{i} new trades #{new_trades.count-i} repeat trades"
       end
       sleep SLEEP
     end
@@ -84,13 +84,20 @@ class DTCC_logger
     # Enhance trade with meta_data 
     # 1- add a spot ref
     begin
-      pair = "#{trade[:und]}#{trade[:acc]}"
-      spot_ref = @fx_cache.spot(pair)
-      trade[:m_spot_ref] = spot_ref  if spot_ref
-      $LOG.debug "#{trade[:dtcc_id]} : Added spot ref #{pair}: #{spot_ref}"
+      pair = trade[:und] + trade[:acc]
+      alpha_pair = trade[:und] < trade[:acc] ? trade[:und] + trade[:acc] : trade[:acc] + trade[:und]
 
+      if ( pair.size == 6 )
+        spot_ref = @fx_cache.spot(pair)
+        trade[:m_spot_ref] = spot_ref  if spot_ref
+        trade[:m_alpha_pair] = alpha_pair
+        $LOG.debug "#{trade[:dtcc_id]} : Meta data - added spot ref #{pair}: #{spot_ref}"
+        $LOG.debug "#{trade[:dtcc_id]} : Meta data - added alpha_pair #{alpha_pair}"
+      else
+        $LOG.debug "#{trade[:dtcc_id]} : Meta data -No pair found for trade"
+      end
     rescue
-      $LOG.warn "#{trade[:dtcc_id]} : Error adding spot_ref using FX service for pair #{pair}: ERROR : #{$!}"
+      $LOG.warn "#{trade[:dtcc_id]} : Meta data -Error adding spot_ref using FX service for pair #{pair}: ERROR : #{$!}"
     end
 
     # 2- add a usd equiv notional
@@ -100,26 +107,28 @@ class DTCC_logger
       if trade[:und].upcase == "USD"
         usd_equiv_not = trade[:und_not]
         trade[:m_usd_equiv_not] = usd_equiv_not
-        $LOG.debug "#{trade[:dtcc_id]} : Added USD Equiv Notional of #{usd_equiv_not}"
+        $LOG.debug "#{trade[:dtcc_id]} : Meta data - added USD Equiv Notional of #{usd_equiv_not}"
 
       elsif trade[:acc].upcase == "USD"
         usd_equiv_not = trade[:acc_not]
         trade[:m_usd_equiv_not] = usd_equiv_not
-        $LOG.debug "#{trade[:dtcc_id]} : Added USD Equiv Notional of #{usd_equiv_not}"
+        $LOG.debug "#{trade[:dtcc_id]} : Meta data - USD Equiv Notional of #{usd_equiv_not}"
 
       else
-        pair = "USD#{trade[:und]}"
-        usdccy = @fx_cache.spot(pair)
-        $LOG.debug "#{trade[:dtcc_id]} : #{pair} spot ref : #{usdccy}"
+        if ( trade[:und] )
+          pair = "USD" + trade[:und]
+          usdccy = @fx_cache.spot(pair)
+          $LOG.debug "#{trade[:dtcc_id]} : Meta data - sourced #{pair} spot ref : #{usdccy}"
 
-        if usdccy && usdccy != 0
-          usd_equiv_not = trade[:und_not] / usdccy
-          trade[:m_usd_equiv_not] = usd_equiv_not
-          $LOG.debug "#{trade[:dtcc_id]} : Added USD Equiv Notional of #{usd_equiv_not}"
+          if usdccy && usdccy != 0
+            usd_equiv_not = trade[:und_not] / usdccy
+            trade[:m_usd_equiv_not] = usd_equiv_not
+            $LOG.debug "#{trade[:dtcc_id]} : Meta data - added USD Equiv Notional of #{usd_equiv_not}"
+          end
         end
       end
     rescue
-      $LOG.warn "#{trade[:dtcc_id]} : Error adding USD equiv Not for pair #{pair}: ERROR : #{$!}"
+      $LOG.warn "#{trade[:dtcc_id]} : Meta data - failed to add USD equiv Not for pair #{pair}: ERROR : #{$!}"
     end
   end
 
@@ -135,7 +144,7 @@ class DTCC_logger
     else
       $LOG.info "#{trade[:dtcc_id]} : Added new trade into #{HOST}:#{DB}:#{COLLECTION} #{ @trades.find('_id' => id).to_a }"
     end
-  
+
   end
 
   def exception_message(e)

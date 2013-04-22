@@ -1,5 +1,6 @@
 class Trade
   include Mongoid::Document
+  store_in collection: "test_trades"
   field :rss_guid, type: String
   field :dtcc_id, type: String
   field :orig_dtcc_id, type: String
